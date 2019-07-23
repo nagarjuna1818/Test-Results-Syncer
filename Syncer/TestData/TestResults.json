@@ -1,0 +1,14 @@
+{
+  "suiteId": 6,
+  "testCases": [
+    {
+      "testCaseId": 88,
+      "outcome": "Passed",
+      "testSuiteId": 89
+    },
+    {
+      "testCaseId": 87,
+      "outcome": "NotExecuted"
+    }
+  ]
+}

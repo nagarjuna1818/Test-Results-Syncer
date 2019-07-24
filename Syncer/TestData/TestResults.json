@@ -8,7 +8,7 @@
     },
     {
       "testCaseId": 87,
-      "outcome": "NotExecuted"
+      "outcome": "Failed"
     }
   ]
 }

@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syncer", "Syncer\Syncer.csproj", "{996073F7-86E4-4644-A304-748D19F1C24C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Syncer", "Syncer\Syncer.csproj", "{996073F7-86E4-4644-A304-748D19F1C24C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EAB28345-A387-4F6A-A368-A8A799A5B3E2}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

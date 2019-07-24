@@ -7,59 +7,66 @@
     using Syncer.Entities;
 
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using System.Xml.Serialization;
 
+    /// <summary>
+    /// Utility to update test results from trx file.
+    /// </summary>
     public static class TrxUtility
     {
-        private static IEnumerable<string> TestSuiteIds;
-        private static bool Consideration;
         private static TestRun tr;
+        private static bool Consideration;
         private static List<TestResult> TestResults;
-        private static List<IGrouping<string, TestCase>> TestCasesByPlanId;
-        private static List<IGrouping<string, TestResult>> TestResultsByClass;
-        private static List<string> NewTestRunIds = new List<string>();
-        private static List<TestCase> TestCases = new List<TestCase>();
-        private static List<string> AutomatedTestNames = new List<string>();
+        private static IEnumerable<string> TestSuiteIds;
         private static Dictionary<string, List<string>> TestPointIds;
-        private static readonly ConcurrentDictionary<string, List<TestResult>> TestsPerAssembly = new ConcurrentDictionary<string, List<TestResult>>();
+        private static List<IGrouping<string, TestCase>> TestCasesByPlanId;
+        private static readonly List<string> NewTestRunIds = new List<string>();
+        private static readonly List<TestCase> TestCases = new List<TestCase>();
+        private static readonly List<string> AutomatedTestNames = new List<string>();
 
+        /// <summary>
+        /// Update Test Results.
+        /// </summary>
+        /// <param name="filePath">TRX file path.</param>
+        /// <param name="account">Account.</param>
+        /// <param name="project">Project.</param>
+        /// <param name="token">PAT.</param>
+        /// <param name="testSuiteIds">Test Suite Ids.</param>
+        /// <param name="consideration">Consideration of specified Test Suite Ids.</param>
+        /// <returns>Integer.</returns>
         public static int UpdateTestResults(string filePath, string account, string project, string token, IEnumerable<string> testSuiteIds, bool consideration)
         {
             TestSuiteIds = testSuiteIds;
             Consideration = consideration;
             AzureDevOpsUtility.UpdateAccountDetails(account, project, token);
-            var files = new List<string>();
-            if (!filePath.EndsWith("trx"))
+            try
             {
-                files = Directory.GetFiles(filePath, "*.trx").ToList();
+                ParseTestRun(filePath);
+                GetAutomatedTestNames();
+                GetTestCasesByPlanAsync().GetAwaiter().GetResult();
+                GetTestPointIdsAsync().GetAwaiter().GetResult();
+                CreateNewTestRunsAsync().GetAwaiter().GetResult();
+                UpdateTestResultsAsync().GetAwaiter().GetResult();
+                UploadTrxFileAsTestRunAttachment(filePath).GetAwaiter().GetResult();
+                UpdateTestRunsAsync().GetAwaiter().GetResult();
             }
-            else
+            catch (Exception e)
             {
-                files.Add(filePath);
+                DeleteTestRunsAsync().GetAwaiter().GetResult();
+                throw e;
             }
 
-            if (files.Count() == 0)
-            {
-                throw new FileNotFoundException($"Cannot find TRX file under {filePath}. Please provide valid TRX file path.");
-            }
-
-            ParseTestRun(files[0]);
-            GetAutomatedTestNames();
-            GetTestCasesByPlanAsync().GetAwaiter().GetResult();
-            GetTestPointIdsAsync().GetAwaiter().GetResult();
-            CreateNewTestRunsAsync().GetAwaiter().GetResult();
-            UpdateTestResultsAsync().GetAwaiter().GetResult();
-            UploadTrxFileAsTestRunAttachment(files[0]).GetAwaiter().GetResult();
-            UpdateTestRunsAsync().GetAwaiter().GetResult();
-            //DeleteTestRunAsync().GetAwaiter().GetResult();
             return 0;
         }
 
+        /// <summary>
+        /// Parse TRX file.
+        /// </summary>
+        /// <param name="file">TRX file path.</param>
         private static void ParseTestRun(string file)
         {
             Console.WriteLine();
@@ -85,11 +92,12 @@
 
                     return item;
                 }).Where(x => x != null).ToList();
-
-                TestResultsByClass = TestResults.GroupBy(x => x.ClassName).OrderBy(x => x.Key).ToList();
             }
         }
 
+        /// <summary>
+        /// Get Automated Test Names of each Test in TRX file.
+        /// </summary>
         private static void GetAutomatedTestNames()
         {
             tr.TestDefinitions.ToList().ForEach(x =>
@@ -98,6 +106,10 @@
             });
         }
 
+        /// <summary>
+        /// Get Test Cases in each Test Plan.
+        /// </summary>
+        /// <returns>Task.</returns>
         private static async Task GetTestCasesByPlanAsync()
         {
             var allWorkItems = new Dictionary<string, JObject>();
@@ -126,6 +138,10 @@
             TestCasesByPlanId = TestCases.GroupBy(y => y.TestPlanId).OrderBy(z => z.Key).ToList();
         }
 
+        /// <summary>
+        /// Get Test Point Ids.
+        /// </summary>
+        /// <returns>Task.</returns>
         private static async Task GetTestPointIdsAsync()
         {
             var testCasesIds = TestCases.Select(x => x.TestCaseId).Distinct();
@@ -136,6 +152,10 @@
             }
         }
 
+        /// <summary>
+        /// Create new Test Run.
+        /// </summary>
+        /// <returns>Task.</returns>
         private static async Task CreateNewTestRunsAsync()
         {
             for (var i = 0; i < TestCasesByPlanId.Count; i++)
@@ -145,6 +165,10 @@
             }
         }
 
+        /// <summary>
+        /// Update Test Results from TRX file.
+        /// </summary>
+        /// <returns>Task.</returns>
         private static async Task UpdateTestResultsAsync()
         {
             foreach (var testRunId in NewTestRunIds)
@@ -154,22 +178,28 @@
                 foreach (var testresult in testresults.SelectToken("value").ToList())
                 {
                     var testResultsFromTrx = TestResults.Where(x => (x.ClassName + "." + x.TestName.Split('(')[0]).Equals(testresult.SelectToken("automatedTestName").ToString()));
-                    var testResult = testResultsFromTrx.Any(x => x.Outcome.Equals("Failed")) ? testResultsFromTrx.FirstOrDefault(x => x.Outcome.Equals("Failed")) : testResultsFromTrx.All(x => x.Outcome.Equals("NotExecuted")) ? testResultsFromTrx.FirstOrDefault() : testResultsFromTrx.FirstOrDefault(x => x.Outcome.Equals("Passed"));
+                    var testResult = testResultsFromTrx.Any(x => x.Outcome.Equals(Constants.Failed)) ? testResultsFromTrx.FirstOrDefault(x => x.Outcome.Equals(Constants.Failed)) : testResultsFromTrx.All(x => x.Outcome.Equals(Constants.NotExecuted)) ? testResultsFromTrx.FirstOrDefault() : testResultsFromTrx.FirstOrDefault(x => x.Outcome.Equals(Constants.Passed));
                     var (errorMessage, trace) = GetErrorMessageAndStackTrace(testResult, testResultsFromTrx);
-                    resultArray.Add(new { id = testresult.SelectToken("id"), state = "Completed", durationInMs = testResultsFromTrx.Sum(x => x.Duration.Value.Milliseconds), outcome = testResult.Outcome, computerName = testResult.ComputerName, errorMessage, stackTrace = trace });
+                    resultArray.Add(new { id = testresult.SelectToken("id"), state = Constants.Completed, durationInMs = testResultsFromTrx.Sum(x => x.Duration.Value.Milliseconds), outcome = testResult.Outcome, computerName = testResult.ComputerName, errorMessage, stackTrace = trace });
                 }
 
                 await AzureDevOpsUtility.UpdateTestResultsOfATestRunAsync(testRunId, resultArray).ConfigureAwait(false);
             }
         }
 
+        /// <summary>
+        /// Get Error Message and Stack Trace for a Test Case
+        /// </summary>
+        /// <param name="testResult">Test Result.</param>
+        /// <param name="testResultsFromTrx">Test Results of TRX file.</param>
+        /// <returns>Task.</returns>
         private static (string errorMessage, string trace) GetErrorMessageAndStackTrace(TestResult testResult, IEnumerable<TestResult> testResultsFromTrx)
         {
             string errorMessage = string.Empty;
             string trace = string.Empty;
-            if (testResult.Outcome.Equals("Failed"))
+            if (testResult.Outcome.Equals(Constants.Failed))
             {
-                var allTestResultErrorMessages = testResultsFromTrx.Where(x => x.Outcome.Equals("Failed")).Select(y => new
+                var allTestResultErrorMessages = testResultsFromTrx.Where(x => x.Outcome.Equals(Constants.Failed)).Select(y => new
                 {
                     ErrorMessage = $"Test Name: {y.TestName}\nErrorMessage: {y.Error}",
                     Trace = $"Test Name: {y.TestName}\nTrace: {y.Trace}"
@@ -180,7 +210,7 @@
             }
             else
             {
-                var allTestResultErrorMessages = testResultsFromTrx.Where(x => x.Outcome.Equals("NotExecuted")).Select(y => new
+                var allTestResultErrorMessages = testResultsFromTrx.Where(x => x.Outcome.Equals(Constants.NotExecuted)).Select(y => new
                 {
                     ErrorMessage = $"Test Name: {y.TestName}\nErrorMessage: {y.Error}"
                 });
@@ -191,6 +221,11 @@
             return (errorMessage, trace);
         }
 
+        /// <summary>
+        /// Upload TRX file as an Attachment.
+        /// </summary>
+        /// <param name="file">TRX file.</param>
+        /// <returns>Task.</returns>
         private static async Task UploadTrxFileAsTestRunAttachment(string file)
         {
             foreach (var testRunId in NewTestRunIds)
@@ -199,6 +234,10 @@
             }
         }
 
+        /// <summary>
+        /// Update Test Runs.
+        /// </summary>
+        /// <returns>Task.</returns>
         private static async Task UpdateTestRunsAsync()
         {
             foreach (var testRunId in NewTestRunIds)
@@ -207,7 +246,11 @@
             }
         }
 
-        private static async Task DeleteTestRunAsync()
+        /// <summary>
+        /// Delete Test Runs.
+        /// </summary>
+        /// <returns>Task.</returns>
+        private static async Task DeleteTestRunsAsync()
         {
             if (NewTestRunIds.Count() > 0)
             {

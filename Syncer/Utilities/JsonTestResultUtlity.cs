@@ -12,11 +12,23 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Utility to update test results from json file.
+    /// </summary>
     public class JsonTestResultUtlity
     {
         private static TestResults TestResults;
-        private static List<TestCase> TestCases = new List<TestCase>();
-        public static int UpdateResults(string filePath, string account, string project, string token)
+        private static readonly List<TestCase> TestCases = new List<TestCase>();
+
+        /// <summary>
+        /// Update Test Results.
+        /// </summary>
+        /// <param name="filePath">JSON file path.</param>
+        /// <param name="account">Account.</param>
+        /// <param name="project">Project.</param>
+        /// <param name="token">Token.</param>
+        /// <returns>Integer.</returns>
+        public static int UpdateTestResults(string filePath, string account, string project, string token)
         {
             AzureDevOpsUtility.UpdateAccountDetails(account, project, token);
             var json = File.ReadAllText(filePath);

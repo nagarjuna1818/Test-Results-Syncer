@@ -8,8 +8,18 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Common Utility.
+    /// </summary>
     public static class CommonUtility
     {
+        /// <summary>
+        /// Get Test Cases to be updated in Azure DevOps.
+        /// </summary>
+        /// <param name="workItem">WorkItem object.</param>
+        /// <param name="testSuiteIds">Test Suite Ids.</param>
+        /// <param name="consideration">Consideration of Test Suite Ids.</param>
+        /// <returns>List of Test Cases.</returns>
         public static async Task<List<TestCase>> GetCasesAsync(JToken workItem, IEnumerable<string> testSuiteIds, bool consideration)
         {
             var testCases = new List<TestCase>();
@@ -50,6 +60,14 @@
             return testCases;
         }
 
+        /// <summary>
+        /// Get Test Points that needs to be part of new Test Run.
+        /// </summary>
+        /// <param name="testCases">Test Cases.</param>
+        /// <param name="result">Result.</param>
+        /// <param name="testSuiteIds">Test Suite Ids.</param>
+        /// <param name="consideration">Consideration of Test Suite Ids.</param>
+        /// <returns>Test Plans and its Test Points.</returns>
         public static Dictionary<string, List<string>> GetTestPointsThatNeedsToBePartOfNewTestRunAsync(IEnumerable<TestCase> testCases, JObject result, IEnumerable<string> testSuiteIds, bool consideration = false)
         {
             var points = result.SelectToken("points");

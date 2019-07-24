@@ -4,23 +4,31 @@
 
     using Serilog;
 
+    using Syncer.Entities;
     using Syncer.Utilities;
 
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
 
+    /// <summary>
+    /// StartUp class.
+    /// </summary>
     internal class Program
     {
+        /// <summary>
+        /// Main method.
+        /// </summary>
+        /// <param name="args">Command line arguments.</param>
         private static void Main(string[] args)
         {
             SetLogger();
             try
             {
-                var result = Parser.Default.ParseArguments<TrxOptions, JsonOptions>(args)
+                var result = Parser.Default.ParseArguments<UpdateOptions>(args)
                     .MapResult(
-                    (TrxOptions opts) => UpdateUsingTRX(opts.FilePath, opts.Account, opts.Project, opts.Token, opts.TestSuiteIds, opts.ConsiderTestSuitesIdsOnlyForDuplicateTestCases),
-                    (JsonOptions opts) => UpdateUsingJson(opts.FilePath, opts.Account, opts.Project, opts.Token),
+                    (UpdateOptions opts) => UpdateResults(opts.FilePath, opts.Account, opts.Project, opts.Token, opts.TestSuiteIds, opts.ConsiderTestSuitesIdsOnlyForDuplicateTestCases),
                     errs => HandleParseErrors(errs?.ToList()));
             }
             catch (Exception ex)
@@ -32,16 +40,44 @@
             Console.ReadKey();
         }
 
-        private static object UpdateUsingJson(string filePath, string account, string project, string token)
+        /// <summary>
+        /// Update Results from data in the specified input file.
+        /// </summary>
+        /// <param name="filePath">Input file path.</param>
+        /// <param name="account">Azure DevOps Account / Organization.</param>
+        /// <param name="project">Azure DevOps Project.</param>
+        /// <param name="token">Azure DevOps PAT (Token).</param>
+        /// <param name="testSuiteIds">Test Suite Ids.</param>
+        /// <param name="consideration">Consideration of specified Test Suite Ids.</param>
+        /// <returns>Integer.</returns>
+        private static int UpdateResults(string filePath, string account, string project, string token, IEnumerable<string> testSuiteIds, bool consideration)
         {
-            return JsonTestResultUtlity.UpdateResults(filePath, account, project, token);
+            var files = new List<string>();
+            if ((!filePath.EndsWith(Constants.Trx)) && (!filePath.EndsWith(Constants.Json)))
+            {
+                files = Directory.GetFiles(filePath, "*.trx").ToList();
+                if (!(files.Count > 0))
+                    files = Directory.GetFiles(filePath, "*.json").ToList();
+                if (!(files.Count > 0))
+                    throw new FileNotFoundException($"Cannot find TRX / JSON files under {filePath}. Please provide valid TRX / JSON file path.");
+            }
+            else
+            {
+                files.Add(filePath);
+            }
+
+            var file = files.FirstOrDefault();
+            if (file.EndsWith(Constants.Trx))
+                return TrxUtility.UpdateTestResults(file, account, project, token, testSuiteIds, consideration);
+            else
+                return JsonTestResultUtlity.UpdateTestResults(file, account, project, token);
         }
 
-        private static int UpdateUsingTRX(string filePath, string account, string project, string token, IEnumerable<string> testSuiteIds, bool consideration)
-        {
-            return TrxUtility.UpdateTestResults(filePath, account, project, token, testSuiteIds, consideration);
-        }
-
+        /// <summary>
+        /// Handle Parse Errors.
+        /// </summary>
+        /// <param name="errs">Error List.</param>
+        /// <returns>Integer.</returns>
         private static int HandleParseErrors(List<Error> errs)
         {
             if (errs.Count > 1)
@@ -52,6 +88,9 @@
             return errs.Count;
         }
 
+        /// <summary>
+        /// Setting up Logger.
+        /// </summary>
         private static void SetLogger()
         {
             Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Console(outputTemplate: "[{Level:u3}] {Message}{NewLine}").Enrich.FromLogContext().CreateLogger();

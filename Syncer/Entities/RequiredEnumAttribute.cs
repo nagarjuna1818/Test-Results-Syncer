@@ -1,6 +1,10 @@
 ﻿namespace Syncer.Entities
 {
     using System.ComponentModel.DataAnnotations;
+
+    /// <summary>
+    /// Required Enum Attribute Validation.
+    /// </summary>
     public sealed class RequiredEnumAttribute : ValidationAttribute
     {
         /// <summary>

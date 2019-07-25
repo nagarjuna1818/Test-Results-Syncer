@@ -56,7 +56,7 @@
             }
             catch (Exception e)
             {
-                DeleteTestRunsAsync().GetAwaiter().GetResult();
+                CommonUtility.DeleteTestRunsAsync(NewTestRunIds).GetAwaiter().GetResult();
                 throw e;
             }
 
@@ -243,21 +243,6 @@
             foreach (var testRunId in NewTestRunIds)
             {
                 await AzureDevOpsUtility.UpdateTestRunAsync(tr, testRunId).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary>
-        /// Delete Test Runs.
-        /// </summary>
-        /// <returns>Task.</returns>
-        private static async Task DeleteTestRunsAsync()
-        {
-            if (NewTestRunIds.Count() > 0)
-            {
-                foreach (var testRunId in NewTestRunIds)
-                {
-                    await AzureDevOpsUtility.DeleteTestRunAsync(testRunId).ConfigureAwait(false);
-                }
             }
         }
     }

@@ -112,5 +112,20 @@
 
             return testPointIds;
         }
+        
+        /// <summary>
+        /// Delete Test Runs.
+        /// </summary>
+        /// <returns>Task.</returns>
+        public static async Task DeleteTestRunsAsync(List<string> testRunIds)
+        {
+            if (testRunIds.Count() > 0)
+            {
+                foreach (var testRunId in testRunIds)
+                {
+                    await AzureDevOpsUtility.DeleteTestRunAsync(testRunId).ConfigureAwait(false);
+                }
+            }
+        }
     }
 }

@@ -22,8 +22,12 @@
     /// </summary>
     public class TestResultUtlity
     {
+        private static TestRun Tr;
         private static TestResults TestResults;
+        private static List<IGrouping<string, TestCase>> TestCasesByPlanId;
+        private static readonly List<string> NewTestRunIds = new List<string>();
         private static readonly List<TestCase> TestCases = new List<TestCase>();
+        private static readonly Dictionary<string, List<string>> TestPointIds = new Dictionary<string, List<string>>();
 
         /// <summary>
         /// Update Test Results.
@@ -68,18 +72,30 @@
 
             try
             {
-                UpdateTestCasesAsync().GetAwaiter().GetResult();
+                GetTestCasesByPlanAsync().GetAwaiter().GetResult();
+                GetTestPointIdsAsync().GetAwaiter().GetResult();
+                CreateNewTestRunsAsync().GetAwaiter().GetResult();
+                UpdateTestRunsAsync().GetAwaiter().GetResult();
             }
             catch (FlurlHttpException e)
             {
                 if (e.Call.Response.StatusCode.ToString().Equals(Constants.NonAuthoritativeInformation))
                     Log.Warning("Authentication Error!!! Please provide valid Account Details...\n");
             }
+            catch (Exception e)
+            {
+                CommonUtility.DeleteTestRunsAsync(NewTestRunIds).GetAwaiter().GetResult();
+                throw e;
+            }
             
             return 0;
         }
 
-        private static async Task UpdateTestCasesAsync()
+        /// <summary>
+        /// Get TestCases to be updated.
+        /// </summary>
+        /// <returns>Task.</returns>
+        private static async Task GetTestCasesByPlanAsync()
         {
             foreach (var testCase in TestResults.TestCases)
             {
@@ -148,9 +164,16 @@
                 }
             }
 
-            var testCasesByPlanId = TestCases.GroupBy(y => y.TestPlanId).OrderBy(z => z.Key).ToList();
+            TestCasesByPlanId = TestCases.GroupBy(y => y.TestPlanId).OrderBy(z => z.Key).ToList();
+        }
+
+        /// <summary>
+        /// Get Test Point Ids.
+        /// </summary>
+        /// <returns>Task.</returns>
+        private static async Task GetTestPointIdsAsync()
+        {
             var testCasesIds = TestCases.Select(x => x.TestCaseId).Distinct();
-            var testPointIds = new Dictionary<string, List<string>>();
             if (testCasesIds.Count() > 0)
             {
                 var result = await AzureDevOpsUtility.GetTestPointsByTestCaseIdsAsync(testCasesIds).ConfigureAwait(false);
@@ -186,12 +209,18 @@
                         }
                     }
 
-                    testPointIds.Add(y, tps);
+                    TestPointIds.Add(y, tps);
                 });
             }
+        }
 
-            var newTestRunIds = new List<string>();
-            var tr = new TestRun
+        /// <summary>
+        /// Create new Test Run.
+        /// </summary>
+        /// <returns>Task.</returns>
+        private static async Task CreateNewTestRunsAsync()
+        {
+            Tr = new TestRun
             {
                 name = $"ManualTestRun_{DateTime.Now}",
                 Times = new TestRunTimes
@@ -201,13 +230,20 @@
                 }
             };
 
-            for (var i = 0; i < testCasesByPlanId.Count; i++)
+            for (var i = 0; i < TestCasesByPlanId.Count; i++)
             {
-                var testPlanId = testCasesByPlanId[i].Select(x => int.Parse(x.TestPlanId)).FirstOrDefault();
-                newTestRunIds.Add((await AzureDevOpsUtility.CreateNewTestRunAsync(tr, testPlanId, testPointIds[testPlanId.ToString()].ToArray(), false).ConfigureAwait(false)).SelectToken("id").ToString());
+                var testPlanId = TestCasesByPlanId[i].Select(x => int.Parse(x.TestPlanId)).FirstOrDefault();
+                NewTestRunIds.Add((await AzureDevOpsUtility.CreateNewTestRunAsync(Tr, testPlanId, TestPointIds[testPlanId.ToString()].ToArray(), false).ConfigureAwait(false)).SelectToken("id").ToString());
             }
+        }
 
-            foreach (var testRunId in newTestRunIds)
+        /// <summary>
+        /// Update Test Runs.
+        /// </summary>
+        /// <returns>Task.</returns>
+        private static async Task UpdateTestRunsAsync()
+        {
+            foreach (var testRunId in NewTestRunIds)
             {
                 var testresults = await AzureDevOpsUtility.GetTestResultsOfATestRunAsync(testRunId).ConfigureAwait(false);
                 var resultArray = new List<object>();
@@ -218,7 +254,7 @@
                 }
 
                 await AzureDevOpsUtility.UpdateTestResultsOfATestRunAsync(testRunId, resultArray).ConfigureAwait(false);
-                await AzureDevOpsUtility.UpdateTestRunAsync(tr, testRunId).ConfigureAwait(false);
+                await AzureDevOpsUtility.UpdateTestRunAsync(Tr, testRunId).ConfigureAwait(false);
             }
         }
     }

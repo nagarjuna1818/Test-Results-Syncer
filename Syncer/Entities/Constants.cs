@@ -16,6 +16,16 @@
         public static string Json = "json";
 
         /// <summary>
+        /// Xlsx.
+        /// </summary>
+        public static string Xlsx = "xlsx";
+
+        /// <summary>
+        /// Xls.
+        /// </summary>
+        public static string Xls = "xls";
+
+        /// <summary>
         /// Failed.
         /// </summary>
         public static string Failed = "Failed";
@@ -34,5 +44,15 @@
         /// Completed.
         /// </summary>
         public static string Completed = "Completed";
+
+        /// <summary>
+        /// NotFound.
+        /// </summary>
+        public static string NotFound = "NotFound";
+
+        /// <summary>
+        /// NonAuthoritativeInformation.
+        /// </summary>
+        public static string NonAuthoritativeInformation = "NonAuthoritativeInformation";
     }
 }

@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="c93c5f2a-1e99-45bd-8df7-d65970004503" name="VssAdministrator@fv-az45 2019-07-05 17:15:36" runUser="fv-az45\VssAdministrator" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2019-07-05T17:15:36.6597735+00:00" queuing="2019-07-05T17:15:36.6597735+00:00" start="2019-07-05T17:15:15.7287440+00:00" finish="2019-07-05T17:15:46.8984884+00:00" />
+  <TestSettings name="default" id="179ffba5-c392-44d6-a53c-11c84b71e386">
+    <Deployment runDeploymentRoot="VssAdministrator_fv-az45_2019-07-05_17_15_36" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="a1d7e563-a9fc-4a61-b542-4c37fee09c9e" testId="a58cc30d-82d9-cc1f-cbf3-2386eea347d2" testName="DoubleClick" computerName="fv-az45" duration="00:00:15.0520000" startTime="2019-07-05T17:15:21.0000000+00:00" endTime="2019-07-05T17:15:36.0000000+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a1d7e563-a9fc-4a61-b542-4c37fee09c9e">
+      <Output>
+        <StdOut>Given I have launched "ElementClick" site&#xD;
+-&gt; done: RandomWebOperationsSteps.GivenIHaveLaunchedSite("ElementClick") (2.5s)&#xD;
+And I double-click "ClickHereToTest" button&#xD;
+-&gt; done: RandomWebOperationsSteps.GivenIDouble_ClickButton("ClickHereToTest") (0.1s)&#xD;
+Then the output should show "dblclick"&#xD;
+-&gt; done: RandomWebOperationsSteps.ThenTheOutputShouldShow("dblclick") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="dbce28eb-aff7-4d37-aa8f-efb7403700cf" testId="72b20111-5829-ac0c-e771-7e4e2dd7c732" testName="GoogleForEnv" computerName="fv-az45" duration="00:00:09.5600000" startTime="2019-07-05T17:15:36.0000000+00:00" endTime="2019-07-05T17:15:46.0000000+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dbce28eb-aff7-4d37-aa8f-efb7403700cf">
+      <Output>
+        <StdOut>Given I have launched "Google" site&#xD;
+-&gt; done: RandomWebOperationsSteps.GivenIHaveLaunchedSite("Google") (1.9s)&#xD;
+And I have entered env into the "Query" field&#xD;
+-&gt; done: RandomWebOperationsSteps.GivenIHaveEnteredEnvIntoTheField("Query") (0.1s)&#xD;
+When I press submit&#xD;
+-&gt; done: RandomWebOperationsSteps.WhenIPressSubmit() (1.9s)&#xD;
+Then the "Search Results" should be shown on the screen&#xD;
+-&gt; done: RandomWebOperationsSteps.ThenTheSearchResultsShouldBeShownOnTheScreen("Search Results") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="GoogleForEnv" storage="d:\a\r1\a\_browserstackbdd - 2\drop\demo.tests\bin\release\demo.tests.dll" id="72b20111-5829-ac0c-e771-7e4e2dd7c732">
+      <Execution id="dbce28eb-aff7-4d37-aa8f-efb7403700cf" />
+      <TestMethod codeBase="D:\a\r1\a\_BrowserStackBDD - 2\drop\Demo.Tests\bin\Release\Demo.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Demo.Tests.Features.RandomWebOperationsFeature" name="GoogleForEnv" />
+    </UnitTest>
+    <UnitTest name="DoubleClick" storage="d:\a\r1\a\_browserstackbdd - 2\drop\demo.tests\bin\release\demo.tests.dll" id="a58cc30d-82d9-cc1f-cbf3-2386eea347d2">
+      <Execution id="a1d7e563-a9fc-4a61-b542-4c37fee09c9e" />
+      <TestMethod codeBase="D:\a\r1\a\_BrowserStackBDD - 2\drop\Demo.Tests\bin\Release\Demo.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Demo.Tests.Features.RandomWebOperationsFeature" name="DoubleClick" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="a58cc30d-82d9-cc1f-cbf3-2386eea347d2" executionId="a1d7e563-a9fc-4a61-b542-4c37fee09c9e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="72b20111-5829-ac0c-e771-7e4e2dd7c732" executionId="dbce28eb-aff7-4d37-aa8f-efb7403700cf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="2" executed="2" passed="2" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 3.12.0.0: Test execution started&#xD;
+Running selected tests in D:\a\r1\a\_BrowserStackBDD - 2\drop\Demo.Tests\bin\Release\Demo.Tests.dll&#xD;
+   NUnit3TestExecutor converted 10 of 10 NUnit test cases&#xD;
+NUnit Adapter 3.12.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

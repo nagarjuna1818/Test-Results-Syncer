@@ -2,6 +2,10 @@
   "suiteId": 6,
   "testCases": [
     {
+      "testCaseId": 18999,
+      "outcome": "Failed"
+    },
+    {
       "testCaseId": 88,
       "outcome": "Passed",
       "testSuiteId": 89

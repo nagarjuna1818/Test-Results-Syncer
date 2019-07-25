@@ -1,6 +1,11 @@
 ﻿namespace Syncer.Utilities
 {
+    using Flurl.Http;
+
+    using Ganss.Excel;
+
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     using Serilog;
 
@@ -15,7 +20,7 @@
     /// <summary>
     /// Utility to update test results from json file.
     /// </summary>
-    public class JsonTestResultUtlity
+    public class TestResultUtlity
     {
         private static TestResults TestResults;
         private static readonly List<TestCase> TestCases = new List<TestCase>();
@@ -23,17 +28,54 @@
         /// <summary>
         /// Update Test Results.
         /// </summary>
-        /// <param name="filePath">JSON file path.</param>
+        /// <param name="filePath">file path.</param>
+        /// <param name="isJson">Is input file type Json?</param>
         /// <param name="account">Account.</param>
         /// <param name="project">Project.</param>
         /// <param name="token">Token.</param>
         /// <returns>Integer.</returns>
-        public static int UpdateTestResults(string filePath, string account, string project, string token)
+        public static int UpdateTestResults(string filePath, bool isJson, string account, string project, string token)
         {
             AzureDevOpsUtility.UpdateAccountDetails(account, project, token);
-            var json = File.ReadAllText(filePath);
-            TestResults = JsonConvert.DeserializeObject<TestResults>(json);
-            UpdateTestCasesAsync().GetAwaiter().GetResult();
+            if (isJson)
+            {
+                var json = File.ReadAllText(filePath);
+                TestResults = JsonConvert.DeserializeObject<TestResults>(json);
+            }
+            else
+            {
+                var excel = new ExcelMapper(filePath);
+                excel.AddMapping<TestCaseOutcome>("TestCaseId", t => t.TestCaseId);
+                excel.AddMapping<TestCaseOutcome>("TestSuiteId", t => t.TestSuiteId);
+                excel.AddMapping<TestCaseOutcome>("Outcome", t => t.Outcome)
+                    .SetPropertyUsing(v =>
+                    {
+                        if ((v as string).Equals(Constants.NotExecuted))
+                            return OutcomeType.NotExecuted;
+                        if ((v as string).Equals(Constants.Failed))
+                            return OutcomeType.Failed;
+                        else
+                            return OutcomeType.Passed;
+                    });
+
+                var testCases = excel.Fetch<TestCaseOutcome>().ToList();
+                TestResults = new TestResults()
+                {
+                    SuiteId = 0,
+                    TestCases = testCases
+                };
+            }
+
+            try
+            {
+                UpdateTestCasesAsync().GetAwaiter().GetResult();
+            }
+            catch (FlurlHttpException e)
+            {
+                if (e.Call.Response.StatusCode.ToString().Equals(Constants.NonAuthoritativeInformation))
+                    Log.Warning("Authentication Error!!! Please provide valid Account Details...\n");
+            }
+            
             return 0;
         }
 
@@ -43,7 +85,25 @@
             {
                 var testCaseId = testCase.TestCaseId.ToString();
                 var tsId = testCase.TestSuiteId.ToString();
-                var testSuites = await AzureDevOpsUtility.GetTestSuitesByTestCaseIdAsync(testCaseId).ConfigureAwait(false);
+                JObject testSuites;
+                try
+                {
+                    testSuites = await AzureDevOpsUtility.GetTestSuitesByTestCaseIdAsync(testCaseId).ConfigureAwait(false);
+                }
+                catch (FlurlHttpException e)
+                {
+                    var statusCode = e.Call.Response.StatusCode.ToString();
+                    if (statusCode.Equals(Constants.NotFound))
+                    {
+                        Log.Information($"No Test-case is found with Id - {testCaseId}");
+                        continue;
+                    }
+                    else
+                    {
+                        throw e;
+                    }
+                }
+
                 var testSuitesValues = testSuites.SelectToken("value").ToList();
                 if (testSuitesValues.Count > 1)
                 {
@@ -154,7 +214,7 @@
                 foreach (var testresult in testresults.SelectToken("value").ToList())
                 {
                     var result = TestResults.TestCases.FirstOrDefault(z => z.TestCaseId.ToString().Equals(testresult.SelectToken("testCase.id").ToString()));
-                    resultArray.Add(new { id = testresult.SelectToken("id"), state = "Completed", outcome = result.Outcome.ToString(), durationInMs = 1000 });
+                    resultArray.Add(new { id = testresult.SelectToken("id"), state = Constants.Completed, outcome = result.Outcome.ToString(), durationInMs = 1000 });
                 }
 
                 await AzureDevOpsUtility.UpdateTestResultsOfATestRunAsync(testRunId, resultArray).ConfigureAwait(false);

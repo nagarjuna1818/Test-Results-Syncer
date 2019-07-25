@@ -53,13 +53,17 @@
         private static int UpdateResults(string filePath, string account, string project, string token, IEnumerable<string> testSuiteIds, bool consideration)
         {
             var files = new List<string>();
-            if ((!filePath.EndsWith(Constants.Trx)) && (!filePath.EndsWith(Constants.Json)))
+            if ((!filePath.EndsWith(Constants.Trx)) && (!filePath.EndsWith(Constants.Json)) && (!filePath.EndsWith(Constants.Xlsx)) && (!filePath.EndsWith(Constants.Xls)))
             {
-                files = Directory.GetFiles(filePath, "*.trx").ToList();
+                files = Directory.GetFiles(filePath, $"*.{Constants.Trx}").ToList();
                 if (!(files.Count > 0))
-                    files = Directory.GetFiles(filePath, "*.json").ToList();
+                    files = Directory.GetFiles(filePath, $"*.{Constants.Json}").ToList();
                 if (!(files.Count > 0))
-                    throw new FileNotFoundException($"Cannot find TRX / JSON files under {filePath}. Please provide valid TRX / JSON file path.");
+                    files = Directory.GetFiles(filePath, $"*.{Constants.Xlsx}").ToList();
+                if (!(files.Count > 0))
+                    files = Directory.GetFiles(filePath, $"*.{Constants.Xls}").ToList();
+                if (!(files.Count > 0))
+                    throw new FileNotFoundException($"Cannot find TRX / JSON / Excel files under {filePath}. Please provide valid TRX / JSON / Excel file path.");
             }
             else
             {
@@ -70,7 +74,7 @@
             if (file.EndsWith(Constants.Trx))
                 return TrxUtility.UpdateTestResults(file, account, project, token, testSuiteIds, consideration);
             else
-                return JsonTestResultUtlity.UpdateTestResults(file, account, project, token);
+                return TestResultUtlity.UpdateTestResults(file, file.EndsWith(Constants.Json), account, project, token);
         }
 
         /// <summary>

@@ -65,6 +65,8 @@
                 yield return new Example("\nFollowing command will just update Test-cases present in specified Test-Suites. It will not update Test-cases which are not part of specified Test-Suites even though if Test Results for those Test-Cases are present in TRX file", new UpdateOptions { FilePath = "c:\\users\\abc.trx", TestSuiteIds = new[] { "1", "2" }, Account = "namurako", Project = "ResultsUpdater", Token = "ds2f3m35a56s7i78l8w8efksjdcbsklfhwuie" });
                 yield return new Example("\nFollowing command will update all Test-Cases present in TRX and will only consider specified Test-Suite Ids in-case of duplicate Test-Cases", new UpdateOptions { FilePath = "c:\\users\\abc.trx", ConsiderTestSuitesIdsOnlyForDuplicateTestCases = true, TestSuiteIds = new[] { "1", "2" }, Account = "namurako", Project = "ResultsUpdater", Token = "ds2f3m35a56s7i78l8w8efksjdcbsklfhwuie" });
                 yield return new Example("\nFollowing command will update all Test-cases present in JSON", new UpdateOptions { FilePath = "c:\\users\\abc.json", Account = "namurako", Project = "ResultsUpdater", Token = "ds2f3m35a56s7i78l8w8efksjdcbsklfhwuie" });
+                yield return new Example("\nFollowing command will update all Test-cases present in Excel file of type .xlsx", new UpdateOptions { FilePath = "c:\\users\\abc.xlsx", Account = "namurako", Project = "ResultsUpdater", Token = "ds2f3m35a56s7i78l8w8efksjdcbsklfhwuie" });
+                yield return new Example("\nFollowing command will update all Test-cases present in Excel file of type .xls", new UpdateOptions { FilePath = "c:\\users\\abc.xls", Account = "namurako", Project = "ResultsUpdater", Token = "ds2f3m35a56s7i78l8w8efksjdcbsklfhwuie" });
             }
         }
     }

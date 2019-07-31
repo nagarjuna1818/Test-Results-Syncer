@@ -1,10 +1,8 @@
 # Test-Results-Syncer
 ## About Syncer
----
 ***Syncer*** is a command-line utility tool with rich set of features which helps in updating Azure DevOps Test-Cases with Test Results depending upon type of test execution (Automated or Manual).
 
 ## Features of Syncer
----
 Following are some features of Syncer on high-level:
 - Update Azure DevOps test-cases using different supported Test Results files
 - Supported file formats: **`Trx`**, **`Json`**, **`Excel (.xlsx / .xls)`**
@@ -13,7 +11,6 @@ Following are some features of Syncer on high-level:
 - List down the test-cases which are not part of Azure DevOps
 
 ## Usage
----
 Generally, there are 2 types of Test Execution. 
 1. Automated Test Execution - Testers automate their test-cases using any automation framework and execute them which will generate a file with Test results.
 2. Manual Test Execution - Testers manually execute their test-cases, determine and capture the status / result of test-cases and update in Azure DevOps manually.
@@ -27,7 +24,7 @@ Whereas, in case of Manual Test Execution, this utility tool supports 2 file for
 Supported files: **`Json`**, **`Excel`**
 
 #### Install Syncer Tool
-To use this utility tool, you need to run the following command to install the Syncer tool from Nuget package and make the tool globally available to run from anywhere in your local machine.
+To use this utility tool, you need to run the following command to install the Syncer tool from Nuget package and make it globally available to run from anywhere in your local machine.
 ```
 dotnet tool install -g Syncer
 ```
@@ -188,7 +185,6 @@ The Excel file should contain following 3 columns:
 **`NOTE`**: *TestSuiteId* column will be helpful when a test-case is part of multiple test suites and if you want to update test-case in single test suite only. If *TestSuiteId* is not provided, then this tool will update all the test suites in which the test-case is part of. 
 
 ## Help
----
 > general
 ```
 --help                      Display this help screen

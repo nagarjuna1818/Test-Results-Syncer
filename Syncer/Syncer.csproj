@@ -1,6 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackAsTool>true</PackAsTool>
+    <IsTool>true</IsTool>
+    <ToolCommandName>syncer</ToolCommandName>    
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <Authors>Nagarjuna Murakonda</Authors>
@@ -8,9 +11,14 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Syncer</PackageId>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>Tool to update Test Results in Azure DevOps</Description>
-    <PackageTags>Trx;Json;Azure;Azure DevOps;Sync;Test Results;Test Case</PackageTags>
+    <Description>Utility tool to update Azure DevOps Test-Cases with Test Results</Description>
+    <PackageTags>Trx;Json;Azure;Azure DevOps;Sync;Test Results;Test Case;Test Plan;Test Suite;Pipelines;Build;Release</PackageTags>
     <RepositoryUrl>https://github.com/nagarjuna1818/Test-Results-Syncer</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/nagarjuna1818/Test-Results-Syncer</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>1.0.0</Version>
+    <StartupObject>Syncer.Program</StartupObject>
+    <ApplicationIcon />
   </PropertyGroup>
 
   <ItemGroup>

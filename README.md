@@ -1,6 +1,6 @@
 # Test-Results-Syncer
 ## About Syncer
-***Syncer*** is a command-line utility tool with rich set of features which helps in updating Azure DevOps Test-Cases with Test Results depending upon type of test execution (Automated or Manual).
+***Syncer*** is a command-line utility tool with rich set of features which updates Azure DevOps Test-Cases with Test Results depending upon type of test execution (Automated or Manual).
 
 ## Features of Syncer
 Following are some features of Syncer on high-level:
@@ -23,7 +23,7 @@ Whereas, in case of Manual Test Execution, this utility tool supports 2 file for
 
 Supported files: **`Json`**, **`Excel`**
 
-#### Install Syncer Tool
+### Install Syncer Tool
 To use this utility tool, you need to run the following command to install the Syncer tool from Nuget package and make it globally available to run from anywhere in your local machine.
 ```
 dotnet tool install -g Syncer

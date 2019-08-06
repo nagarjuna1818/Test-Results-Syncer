@@ -54,5 +54,10 @@
         /// NonAuthoritativeInformation.
         /// </summary>
         public static string NonAuthoritativeInformation = "NonAuthoritativeInformation";
+
+        /// <summary>
+        /// Unauthorized.
+        /// </summary>
+        public static string Unauthorized = "Unauthorized";
     }
 }

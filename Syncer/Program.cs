@@ -36,8 +36,7 @@
                 Log.Fatal(ex.Message);
             }
 
-            Log.Information("Please press any key to exit...");
-            Console.ReadKey();
+            Log.CloseAndFlush();
         }
 
         /// <summary>

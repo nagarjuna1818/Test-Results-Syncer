@@ -113,7 +113,7 @@ Drilling into testCases property, it is an array of JObject items containing fol
 2. outcome                - string (Required. Value must be either Passed, Failed or NotExecuted)
 3. testSuiteId            - integer (Optional.)
 ```
-**`NOTE:`** *testSuiteId* property will be helpful when a test-case is part of multiple test suites and if you want to update test-case in single test suite only. If *testSuiteId* is not provided for a test-case, then this tool will update all the test suites in which the test-case is part of.
+**`NOTE:`** *testSuiteId* property will be helpful when a test-case is part of multiple test suites and if you want to update test-case in single test suite only. If *testSuiteId* is not provided for a test-case, then this tool will update the test-case in all the test suites it is part of.
 
 If you see below sample, there are 2 test-cases. First test-case has *testSuiteId* property, whereas second test-case doesn't have *testSuiteId* property. It means that first test-case will be updated in test suite with id as 8, whereas second test-case will be updated in all test suites whichever it is part of.
 ```
@@ -182,7 +182,7 @@ The Excel file should contain following 3 columns:
 2. Outcome                - string (Optional. Defaults to Passed). Value must be either Passed, Failed or NotExecuted
 3. TestSuiteId            - integer (Optional)
 ```
-**`NOTE`**: *TestSuiteId* column will be helpful when a test-case is part of multiple test suites and if you want to update test-case in single test suite only. If *TestSuiteId* is not provided, then this tool will update all the test suites in which the test-case is part of. 
+**`NOTE`**: *TestSuiteId* column will be helpful when a test-case is part of multiple test suites and if you want to update test-case in single test suite only. If *TestSuiteId* is not provided, then this tool will update the test-case in all the test suites it is part of. 
 
 ## Help
 > general

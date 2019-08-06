@@ -79,8 +79,11 @@
             }
             catch (FlurlHttpException e)
             {
-                if (e.Call.Response.StatusCode.ToString().Equals(Constants.NonAuthoritativeInformation))
-                    Log.Warning("Authentication Error!!! Please provide valid Account Details...\n");
+                var statusCode = e.Call.Response.StatusCode.ToString();
+                if (statusCode.Equals(Constants.NonAuthoritativeInformation) || statusCode.Equals(Constants.Unauthorized))
+                {
+                    Log.Error("Authentication Error!!! Please provide valid Account Details...\n");
+                }
             }
             catch (Exception e)
             {

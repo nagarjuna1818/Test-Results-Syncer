@@ -124,7 +124,7 @@
                 }
 
                 var testSuitesValues = testSuites.SelectToken("value").ToList();
-                if (testSuitesValues.Count > 1)
+                if (testSuitesValues.Any())
                 {
                     if (testCase.TestSuiteId != 0)
                     {

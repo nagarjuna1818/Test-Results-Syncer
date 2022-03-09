@@ -70,12 +70,12 @@
         {
             dynamic result;
             var getWorkItemsWithAutomatedTestNameAs = "Select id From WorkItems Where [System.WorkItemType] = 'Test Case' AND [State] <> 'Closed' AND [State] <> 'Removed' AND [Microsoft.VSTS.TCM.AutomatedTestName]='{0}'";
-            using (var content = new CapturedStringContent(new { query = string.Format(CultureInfo.InvariantCulture, getWorkItemsWithAutomatedTestNameAs, automatedTestName) }.ToJson(), Encoding.UTF8, JsonBatchHttpRequestMediaType))
+            using (var content = new CapturedStringContent(new { query = string.Format(CultureInfo.InvariantCulture, getWorkItemsWithAutomatedTestNameAs, automatedTestName) }.ToJson(), JsonBatchHttpRequestMediaType))
             {
                 var workTems = await WiqlUrl.WithHeader(AuthorizationHeader, Pat)
                                         .PostAsync(content)
                                         .ConfigureAwait(false);
-                result = workTems.Content.ReadAsJsonAsync<JObject>().Result;
+                result = workTems.ResponseMessage.Content.ReadAsJsonAsync<JObject>().Result;
             }
 
             return result;
@@ -102,12 +102,12 @@
         public static async Task<JObject> GetTestPointsByTestCaseIdsAsync(IEnumerable<string> testCasesIds)
         {
             dynamic result;
-            using (var content = new CapturedStringContent(new { PointsFilter = new { TestcaseIds = testCasesIds.ToArray() } }.ToJson(), Encoding.UTF8, JsonBatchHttpRequestMediaType))
+            using (var content = new CapturedStringContent(new { PointsFilter = new { TestcaseIds = testCasesIds.ToArray() } }.ToJson(), JsonBatchHttpRequestMediaType))
             {
                 var testpoints = await TestPointsUrl.WithHeader(AuthorizationHeader, Pat)
                                             .PostAsync(content)
                                             .ConfigureAwait(false);
-                result = testpoints.Content.ReadAsJsonAsync<JObject>().Result;
+                result = testpoints.ResponseMessage.Content.ReadAsJsonAsync<JObject>().Result;
             }
 
             return result;
@@ -124,12 +124,12 @@
         public static async Task<JObject> CreateNewTestRunAsync(TestRun testRun, int testPlanId, string[] testPointIds, bool isAutomated = true)
         {
             dynamic result;
-            using (var content = new CapturedStringContent(new { testRun.name, automated = isAutomated, plan = new { id = testPlanId }, pointIds = testPointIds, startDate = testRun.Times.start }.ToJson(), Encoding.UTF8, JsonBatchHttpRequestMediaType))
+            using (var content = new CapturedStringContent(new { testRun.name, automated = isAutomated, plan = new { id = testPlanId }, pointIds = testPointIds, startDate = testRun.Times.start }.ToJson(), JsonBatchHttpRequestMediaType))
             {
                 var testrun = await TestRunsUrl.WithHeader(AuthorizationHeader, Pat)
                                         .PostAsync(content)
                                         .ConfigureAwait(false);
-                result = testrun.Content.ReadAsJsonAsync<JObject>().Result;
+                result = testrun.ResponseMessage.Content.ReadAsJsonAsync<JObject>().Result;
             }
 
             return result;
@@ -156,13 +156,11 @@
         /// <returns>Task.</returns>
         public static async Task UpdateTestResultsOfATestRunAsync(string testRunId, List<object> resultArray)
         {
-            using (var content = new CapturedStringContent(resultArray.ToArray().ToJson(), Encoding.UTF8, JsonBatchHttpRequestMediaType))
-            {
-                var result = await string.Format(CultureInfo.InvariantCulture, TestResultsUrl, testRunId)
-                                            .WithHeader(AuthorizationHeader, Pat)
-                                            .PatchAsync(content)
-                                            .ConfigureAwait(false);
-            }
+            using var content = new CapturedStringContent(resultArray.ToArray().ToJson(), JsonBatchHttpRequestMediaType);
+            var result = await string.Format(CultureInfo.InvariantCulture, TestResultsUrl, testRunId)
+                                        .WithHeader(AuthorizationHeader, Pat)
+                                        .PatchAsync(content)
+                                        .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -176,13 +174,11 @@
         {
             var bytes = File.ReadAllBytes(file);
             var stream = Convert.ToBase64String(bytes);
-            using (var content = new CapturedStringContent(new { stream, fileName = file.Split('\\').Last(), attachmentType = "GeneralAttachment", comment = $"This file contains Test Results of following Test Runs - {string.Join(", ", testRunIds)}" }.ToJson(), Encoding.UTF8, JsonBatchHttpRequestMediaType))
-            {
-                var result = await string.Format(CultureInfo.InvariantCulture, TestRunAttachmentsUrl, testRunId)
-                                        .WithHeader(AuthorizationHeader, Pat)
-                                        .PostAsync(content)
-                                        .ConfigureAwait(false);
-            }
+            using var content = new CapturedStringContent(new { stream, fileName = file.Split('\\').Last(), attachmentType = "GeneralAttachment", comment = $"This file contains Test Results of following Test Runs - {string.Join(", ", testRunIds)}" }.ToJson(), JsonBatchHttpRequestMediaType);
+            var result = await string.Format(CultureInfo.InvariantCulture, TestRunAttachmentsUrl, testRunId)
+                                    .WithHeader(AuthorizationHeader, Pat)
+                                    .PostAsync(content)
+                                    .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -193,13 +189,11 @@
         /// <returns>Task.</returns>
         public static async Task UpdateTestRunAsync(TestRun testRun, string testRunId)
         {
-            using (var content = new CapturedStringContent(new { state = Constants.Completed, completedDate = testRun.Times.finish.ToString(), comment = "This Test Run has been created using an Automated Custom Utility." }.ToJson(), Encoding.UTF8, JsonBatchHttpRequestMediaType))
-            {
-                var updateTestRun = await string.Format(CultureInfo.InvariantCulture, TestRunUrl, testRunId)
-                                        .WithHeader(AuthorizationHeader, Pat)
-                                        .PatchAsync(content)
-                                        .ConfigureAwait(false);
-            }
+            using var content = new CapturedStringContent(new { state = Constants.Completed, completedDate = testRun.Times.finish.ToString(), comment = "This Test Run has been created using an Automated Custom Utility." }.ToJson(), JsonBatchHttpRequestMediaType);
+            var updateTestRun = await string.Format(CultureInfo.InvariantCulture, TestRunUrl, testRunId)
+                                    .WithHeader(AuthorizationHeader, Pat)
+                                    .PatchAsync(content)
+                                    .ConfigureAwait(false);
         }
 
         /// <summary>

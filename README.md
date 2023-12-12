@@ -10,6 +10,12 @@ Following are some features of Syncer on high-level:
 - Support for providing particular Test Suites in which test-cases needs to be updated or in case of same test-case present in multiple test suites
 - List down the test-cases which are not part of Azure DevOps
 
+## Videos which can assist you in using the utility
+
+[![How to use the utility locally](http://i3.ytimg.com/vi/Zjxrv3_J2BM/hqdefault.jpg)](https://www.youtube.com/watch?v=Zjxrv3_J2BM)
+
+[![Integrate utility with pipeline](http://i3.ytimg.com/vi/U8cZKv5f7hE/hqdefault.jpg)](https://www.youtube.com/watch?v=U8cZKv5f7hE&feature=youtu.be)
+
 ## Usage
 Generally, there are 2 types of Test Execution. 
 1. Automated Test Execution - Testers automate their test-cases using any automation framework and execute them which will generate a file with Test results.
